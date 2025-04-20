@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQLite Web Application</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>SQLite Web Application</h1>
+    <form method="GET" action="/search">
+        <input type="text" name="query" placeholder="Search by Name or Email">
+        <button type="submit">Search</button>
+    </form>
+    <h2>User Profiles</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>CreatedDate</th>
+            </tr>
+        </thead>
+        <tbody id="user-table">
+            <!-- Data will be dynamically inserted here -->
+        </tbody>
+    </table>
+    <h2>Dynamic Charts</h2>
+    <canvas id="userChart" width="400" height="200"></canvas>
+    <script>
+        // Function to count phone numbers (example implementation)
+        function countPhoneNumbers(phone) {
+            return phone.split(',').length;  // Assuming phone numbers are comma-separated
+        }
+        // Fetch user data and populate the table and chart
+        fetch('/data')
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('user-table');
+                const chartLabels = [];
+                const chartData = [];
+
+                data.forEach(user => {
+                    // Populate table
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.Id}</td>
+                        <td>${user.Name}</td>
+                        <td>${user.Email}</td>
+                        <td>${user.Phone}</td>
+                        <td>${user.CreatedDate}</td>
+                    `;
+                    tableBody.appendChild(row);
+
+                    // Prepare data for chart
+                    chartLabels.push(user.Name);
+                    chartData.push(user.Phone);  // Assuming countPhoneNumbers is a function that counts phone numbers
+    
+                });
+
+                // Render chart
+                const ctx = document.getElementById('userChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            label: 'Phone Numbers',
+                            data: chartData,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            });
+    </script>
+</body>
+</html>
